@@ -1,0 +1,53 @@
+version: '2'
+
+services:
+  mariadb:
+    image: 'bitnami/mariadb:latest'
+    container_name: mariadb
+    hostname: mariadb
+    ports:
+      - '3306:3306'
+    volumes:
+      - /portainer/appdata/mariadb-master:/bitnami/mariadb
+    environment:
+      - MARIADB_REPLICATION_MODE=master
+      - MARIADB_REPLICATION_USER=repl_user
+      - MARIADB_REPLICATION_PASSWORD=repl_password
+      - MARIADB_ROOT_PASSWORD=password
+      - MARIADB_USER=glpi_user
+      - MARIADB_PASSWORD=glpi
+      - MARIADB_DATABASE=glpidb
+  mariadb-slave:
+    image: 'bitnami/mariadb:latest'
+    container_name: mariadb-slave
+    ports:
+      - '3307:3306'
+    depends_on:
+      - mariadb
+    volumes:
+      - /portainer/appdata/mariadb-slave:/bitnami/mariadb
+    environment:
+      - MARIADB_REPLICATION_MODE=slave
+      - MARIADB_REPLICATION_USER=repl_user
+      - MARIADB_REPLICATION_PASSWORD=repl_password
+      - MARIADB_MASTER_HOST=mariadb
+      - MARIADB_MASTER_PORT_NUMBER=3306
+      - MARIADB_MASTER_ROOT_PASSWORD=password
+  #GLPI Container
+  glpi:
+    image: diouxx/glpi
+    container_name : glpi
+    hostname: glpi
+    depends_on:
+      - mariadb
+      - mariadb-slave
+    ports:
+      - "80:80"
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+      - /portainer/appdata/glpi957fusion9530/glpi-frontend/var/www/html/glpi/:/var/www/html/glpi
+    environment:
+      - TIMEZONE=Europe/Paris
+      - VERSION_GLPI=9.5.7
+    restart: always
