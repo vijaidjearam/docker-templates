@@ -631,8 +631,7 @@
           "bind": "/portainer/appdata",
           "readonly": False
         }
-      ]
-      ],
+      ], 
       "command": "--port 80 --database /data/database.db --root /srv"
     },
     {
