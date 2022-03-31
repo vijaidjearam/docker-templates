@@ -619,14 +619,19 @@
       "platform": "linux",
       "logo": "https://portainer-io-assets.sfo2.digitaloceanspaces.com/logos/filebrowser.png",
       "image": "filebrowser/filebrowser:latest",
-      "ports": ["8080/tcp", "80/tcp"],
+      "ports": ["80/tcp"],
       "volumes": [
         {
-          "/portainer/appdata/FileBrowser": "/data"
+          "container": "/data",
+          "bind": "/portainer/appdata/FileBrowser",
+          "readonly": False
         },
         {
-          "/portainer/appdata": "/srv"
+          "container": "/srv",
+          "bind": "/portainer/appdata",
+          "readonly": False
         }
+      ]
       ],
       "command": "--port 80 --database /data/database.db --root /srv"
     },
