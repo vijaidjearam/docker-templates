@@ -75,7 +75,7 @@ services:
       CRON_SCHEDULE: "0 0 * * *"
       MAILCONTENT: "stdout"
       MAXATTSIZE: "4000"
-      MAILADDR: "vijai-anandh.djearam@univ-reims.fr"  
+      MAILADDR: "test@example.com"  
   #GLPI Container
   glpi:
     image: diouxx/glpi
