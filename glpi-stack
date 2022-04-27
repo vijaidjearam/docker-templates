@@ -34,8 +34,6 @@ services:
     volumes:
       - /portainer/appdata/glpi957fusion9530/mariadb-master:/bitnami/mariadb
     environment:
-      - PUID=0
-      - PGID=0
       - MARIADB_REPLICATION_MODE=master
       - MARIADB_REPLICATION_USER=repl_user
       - MARIADB_REPLICATION_PASSWORD=repl_password
@@ -54,15 +52,30 @@ services:
     volumes:
       - /portainer/appdata/glpi957fusion9530/mariadb-slave:/bitnami/mariadb
     environment:
-      - PUID=0
-      - PGID=0
       - MARIADB_REPLICATION_MODE=slave
       - MARIADB_REPLICATION_USER=repl_user
       - MARIADB_REPLICATION_PASSWORD=repl_password
       - MARIADB_MASTER_HOST=mariadb
       - MARIADB_MASTER_PORT_NUMBER=3306
       - MARIADB_MASTER_ROOT_PASSWORD=password
-  
+  mysqlbackup:
+    image: "selim13/automysqlbackup:2.6-9"
+    container_name: mysqlbackup
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+      - /portainer/appdata/backups:/backup
+    environment:
+      USERNAME: "glpi_user"
+      PASSWORD: "glpi"
+      DBHOST: mariadb
+      DBNAMES: "glpidb"
+      MDBNAMES: "all"
+      DOWEEKLY: "7"
+      CRON_SCHEDULE: "0 0 * * *"
+      MAILCONTENT: "stdout"
+      MAXATTSIZE: "4000"
+      MAILADDR: "vijai-anandh.djearam@univ-reims.fr"  
   #GLPI Container
   glpi:
     image: diouxx/glpi
