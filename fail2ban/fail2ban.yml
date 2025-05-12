@@ -1,0 +1,14 @@
+services:
+  fail2ban:
+    image: crazymax/fail2ban:latest
+    container_name: fail2ban
+    network_mode: host
+    environment:
+      - TZ=Europe/Paris
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    volumes:
+      - /container-data/fail2ban/data:/data
+      - /container-data/Nginx-proxy/data/logs:/log/npm/:ro #optional
+    restart: always

@@ -1,0 +1,52 @@
+version: '3.9'
+services:
+  pihole:
+    container_name: pihole
+    image: pihole/pihole:latest # <- update image version here, see: https://github.com/pi-hole/docker-pi-hole/releases
+    hostname: pihole
+    depends_on:
+      - unbound
+    restart: unless-stopped
+    ports:
+      - "5555:80/tcp" # web ui -> http://localhost:5555/admin
+      - "6666:443/tcp" # web ui -> https://localhost:6666/admin
+      - "53:53/tcp" # DNS tcp port is used as fallback for longer dns messages
+      - "53:53/udp" # DNS port
+    volumes:
+      - "/container-data/pi-hole/etc-pihole:/etc/pihole"
+      - "/container-data/pi-hole/etc-dnsmasq.d:/etc/dnsmasq.d"
+      - "/etc/localtime:/etc/localtime:ro"  # Sync time with host
+      - "/etc/timezone:/etc/timezone:ro"    # Sync timezone with host
+    environment:
+      WEBPASSWORD: 'password'
+      TZ: 'Europe/Paris'
+      PIHOLE_DNS_: '172.20.0.3#53' # forward to unbound
+      DNSSEC: true
+      WEBTHEME: 'default-light'
+    networks:
+      nginx:
+        ipv4_address: 172.20.0.4
+    cap_add:
+      - NET_ADMIN # Recommended but not required (DHCP needs NET_ADMIN)
+      - SYS_TIME  # Add this to allow time sync
+  unbound:
+    container_name: unbound
+    image: mvance/unbound:latest
+    hostname: unbound
+    restart: unless-stopped
+    volumes:
+      - "/container-data/unbound:/opt/unbound/etc/unbound"
+      - "/etc/localtime:/etc/localtime:ro"  # Sync time with host
+      - "/etc/timezone:/etc/timezone:ro"    # Sync timezone with host
+    ports:
+      - "5053:53/tcp" # expose a different port (5053) so you can use it directly
+      - "5053:53/udp"
+    networks:
+      nginx:
+        ipv4_address: 172.20.0.3 # <-- this is used by pihole as upstream DNS
+    cap_add:
+      - SYS_TIME  # Add this to allow time sync
+networks:
+    nginx:
+      external: true
+      name: nginx

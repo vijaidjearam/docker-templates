@@ -1,10 +1,22 @@
-version: "3"
+version: '3.9'
 services:
   filebrowser:
-    image: filebrowser/filebrowser:latest
+    container_name: filebrowser
+    image: 'filebrowser/filebrowser:latest'
     ports:
-      - 8080:80
+      - '8090:80'
+    environment:
+      - PGID=1000
+      - PUID=1000
     volumes:
-      - /portainer/appdata/FileBrowser:/data
-      - /portainer/appdata:/srv
-    restart: always
+      - /container-data/filebrowser/config:/config
+      - /container-data/filebrowser/database:/database
+      - /:/srv
+    networks:
+      nginx:
+        ipv4_address: 172.20.0.12
+    restart: unless-stopped
+networks:
+    nginx:
+      external: true
+      name: nginx

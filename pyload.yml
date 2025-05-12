@@ -1,0 +1,28 @@
+---
+version: "2.1"
+services:
+  pyload:
+    image: lscr.io/linuxserver/pyload-ng:latest
+    container_name: pyload
+    environment:
+      - PUID=0
+      - PGID=0
+      - TZ=Europe/Paris
+    networks:
+      nginx:
+        ipv4_address: 172.20.0.11
+    volumes:
+      - /container-data/pyload/config:/config
+      - nas:/downloads:rw # nas is the volume created manually from portainer GUI
+      # create volume with name : nas use CIFS volume , Address : IP of server Share : share path  CIFS version : vers=3.0  username: username password:password
+    ports:
+      - 8080:8000
+      - 9666:9666 #optional
+    restart: unless-stopped
+networks:
+    nginx:
+      external: true
+      name: nginx
+volumes:
+  nas:
+    external: true

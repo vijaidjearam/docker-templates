@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  symlink-processor:
+    image: vijaidj/jellyfin-symlink-helper:latest
+    container_name: symlink-processor
+    environment:
+      - SOURCE=${SOURCE}
+      - DEST_BASE=${DEST_BASE}
+
+    volumes:
+      - ${SOURCE}:${SOURCE}:ro
+      - ${DEST_BASE}:${DEST_BASE}
+    restart: unless-stopped
