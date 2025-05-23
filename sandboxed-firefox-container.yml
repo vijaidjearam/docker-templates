@@ -1,0 +1,60 @@
+version: "3.9"
+
+services:
+  gluetun:
+    image: qmcgaw/gluetun
+    container_name: gluetun
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - VPN_SERVICE_PROVIDER=protonvpn
+      - OPENVPN_USER=yourusername
+      - OPENVPN_PASSWORD=yourpassword
+      - TZ=Europe/Paris
+    volumes:
+      - ./gluetun:/gluetun
+    ports:
+      - "3000:3000"  # internal Firefox port exposed to NPM
+    networks:
+      - gluetun-net
+
+  firefox:
+    image: linuxserver/firefox
+    container_name: firefox-sandbox
+    depends_on:
+      - gluetun
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Paris
+    shm_size: "2gb"
+    tmpfs:
+      - /config
+    restart: "no"
+
+  npm:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: nginx-proxy-manager
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "81:81"  # admin UI
+    volumes:
+      - npm_data:/data
+      - npm_letsencrypt:/etc/letsencrypt
+    networks:
+      - gluetun-net
+      - default
+
+networks:
+  gluetun-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+
+volumes:
+  npm_data:
+  npm_letsencrypt:
