@@ -1,0 +1,74 @@
+services:
+
+  copyparty:
+    image: copyparty/ac:latest
+    container_name: copyparty
+    #user: "1000:1000"
+    ports:
+      - 3923:3923
+    volumes:
+      - /container-data/copyparty/config:/cfg:z
+      - /:/w:z
+
+    environment:
+      PGID: 1000
+      PUID: 1000
+      LD_PRELOAD: /usr/lib/libmimalloc-secure.so.NOPE
+      # enable mimalloc by replacing "NOPE" with "2" for a nice speed-boost (will use twice as much ram)
+
+      PYTHONUNBUFFERED: 1
+      # ensures log-messages are not delayed (but can reduce speed a tiny bit)
+
+    stop_grace_period: 15s  # thumbnailer is allowed to continue finishing up for 10s after the shutdown signal
+    healthcheck:
+      # hide it from logs with "/._" so it matches the default --lf-url filter 
+      test: ["CMD-SHELL", "wget --spider -q 127.0.0.1:3923/?reset=/._"]
+      interval: 1m
+      timeout: 2s
+      retries: 5
+      start_period: 15s
+    networks:
+      nginx:
+        ipv4_address: 172.20.0.11
+networks:
+    nginx:
+      external: true
+      name: nginx
+
+
+
+#######################
+# Config file to be placed in /container-data/copyparty/config/copyparty.conf
+# toogle cooments 
+# not actually YAML but lets pretend:
+# -*- mode: yaml -*-
+# vim: ft=yaml:
+
+
+# [global]
+#   e2dsa  # enable file indexing and filesystem scanning
+#   e2ts   # enable multimedia indexing
+#   ansi   # enable colors in log messages
+
+#   # q, lo: /cfg/log/%Y-%m%d.log   # log to file instead of docker
+
+#   # p: 3939          # listen on another port
+#   # ipa: 10.89.      # only allow connections from 10.89.*
+#   # df: 16           # stop accepting uploads if less than 16 GB free disk space
+#   # ver              # show copyparty version in the controlpanel
+#   # grid             # show thumbnails/grid-view by default
+#   # theme: 2         # monokai
+#   # name: datasaver  # change the server-name that's displayed in the browser
+#   # stats, nos-dup   # enable the prometheus endpoint, but disable the dupes counter (too slow)
+#   # no-robots, force-js  # make it harder for search engines to read your server
+
+
+# [accounts]
+#   vijai: password  # username: password
+
+
+# [/]            # create a volume at "/" (the webroot), which will
+#   /w           # share /w (the docker data volume)
+#   accs:
+#     #rw: *      # everyone gets read-write access, but
+#     rwmda: vijai  # the user "vijai" gets read-write-move-delete-admin
