@@ -1,0 +1,15 @@
+version: "3"
+services:
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      #WATCHTOWER_DISABLE_CONTAINERS: "nextcloud-aio-database nextcloud-aio-redis nextcloud-aio-fulltextsearch nextcloud-aio-talk-recording nextcloud-aio-imaginary nextcloud-aio-nextcloud nextcloud-aio-notify-push"
+      WATCHTOWER_DISABLE_CONTAINERS: "filebrowser"
+      WATCHTOWER_SCHEDULE: "0 0 1 * * *"
+      WATCHTOWER_CLEANUP: true
+      TZ: "Europe/Paris" 
+      WATCHTOWER_TIMEOUT: 30s
+      WATCHTOWER_NOTIFICATION_SKIP_TITLE: true
+      WATCHTOWER_NOTIFICATION_URL: "ntfy://ntfy.sh/TOPIC?title=WatchtowerUpdates"
