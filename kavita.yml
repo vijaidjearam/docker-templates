@@ -1,0 +1,22 @@
+---
+services:
+  kavita:
+    image: lscr.io/linuxserver/kavita:latest
+    container_name: kavita
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Paris
+    volumes:
+      - /container-data/kavita/config:/config
+      - /mnt/NAS/ebooks:/data #optional
+    ports:
+      - 5000:5000
+    restart: unless-stopped
+    networks:
+      nginx:
+        ipv4_address: 172.20.0.14
+networks:
+    nginx:
+      external: true
+      name: nginx
